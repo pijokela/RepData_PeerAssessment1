@@ -8,18 +8,92 @@ output:
 
 ## Loading and preprocessing the data
 
-
+```{r}
+if (!file.exists("activity.csv")) {
+  unzip("activity.zip")
+}
+activity <- read.csv("activity.csv", header = TRUE, sep = ",")
+dailySteps <- aggregate(steps ~ date, activity, sum)
+intervalSteps <- aggregate(steps ~ interval, activity, mean)
+```
 
 ## What is mean total number of steps taken per day?
 
+```{r}
+hist(dailySteps[["steps"]])
+
+mean(dailySteps[["steps"]])
+
+median(dailySteps[["steps"]])
+```
 
 
 ## What is the average daily activity pattern?
 
+Time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+```{r}
+plot(intervalSteps, type="l")
+# intervalSteps[["interval"]]
+```
+
+The biggest number of steps in an interval is
+
+```{r}
+maxSteps = max(intervalSteps[["steps"]])
+maxSteps
+```
+
+in interval:
+
+```{r}
+intervalSteps[intervalSteps$steps == maxSteps, ][["interval"]]
+```
 
 
 ## Imputing missing values
 
+Total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
+```{r}
+nrow(activity[!complete.cases(activity),])
+```
+
+We will fill in all of the missing values in the dataset. We will use the mean for that 5-minute interval.
+
+```{r}
+getSteps <- Vectorize(function(inter) {
+  intervalSteps[intervalSteps$interval == inter,][["steps"]]
+})
+
+activityFull <- activity
+# activityFull$steps <- getSteps(activityFull$interval)
+# Column1[is.na(Column1)] <- round(mean(Column1, na.rm = TRUE))
+activityFull[is.na(activityFull$steps),]$steps <- getSteps(activityFull[is.na(activityFull$steps),]$interval)
+
+# nrow(activityFull[!complete.cases(activityFull),])
+dailySteps2 <- aggregate(steps ~ date, activityFull, sum)
+```
+
+Check the histogram and mean and median values with the NA values filled in:
+
+```{r}
+hist(dailySteps2[["steps"]])
+
+mean(dailySteps2[["steps"]])
+
+median(dailySteps2[["steps"]])
+```
+
+The highest value of the histogram is higher with the NA values imputed. Overall the median, mean and histogram values are quite similar with the NA values imputed.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+activityFull$dayType <- "weekday"
+
+activityFull$dayType[weekdays(as.Date(activityFull$date)) == 'lauantai'] <- "weekend"
+activityFull$dayType[weekdays(as.Date(activityFull$date)) == 'sunnuntai'] <- "weekend"
+
+# Panel plot still missing
+```

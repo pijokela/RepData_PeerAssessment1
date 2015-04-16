@@ -1,0 +1,5 @@
+.Rhistory
+*.csv
+PA1_template_files
+*.html
+*.md
