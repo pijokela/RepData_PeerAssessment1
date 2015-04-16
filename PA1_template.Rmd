@@ -5,6 +5,7 @@ output:
     keep_md: true
 ---
 
+This is an analysis of activity data containing numbers of steps taken on specific 5 minute intervals during a given day.
 
 ## Loading and preprocessing the data
 
@@ -19,9 +20,14 @@ intervalSteps <- aggregate(steps ~ interval, activity, mean)
 
 ## What is mean total number of steps taken per day?
 
+How many steps did the test subjects take daily?
 ```{r}
 hist(dailySteps[["steps"]])
+```
 
+The mean and median number of daily steps:
+
+```{r}
 mean(dailySteps[["steps"]])
 
 median(dailySteps[["steps"]])
@@ -34,7 +40,6 @@ Time series plot of the 5-minute interval (x-axis) and the average number of ste
 
 ```{r}
 plot(intervalSteps, type="l")
-# intervalSteps[["interval"]]
 ```
 
 The biggest number of steps in an interval is
@@ -89,11 +94,20 @@ The highest value of the histogram is higher with the NA values imputed. Overall
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+Separate steps from weekends and weekdays:
 ```{r}
 activityFull$dayType <- "weekday"
 
 activityFull$dayType[weekdays(as.Date(activityFull$date)) == 'lauantai'] <- "weekend"
 activityFull$dayType[weekdays(as.Date(activityFull$date)) == 'sunnuntai'] <- "weekend"
 
-# Panel plot still missing
+aggregateActivityFull <- aggregate(steps ~ interval+dayType, activityFull, mean)
+```
+
+Plot the daily activity patterns separately for weekends and weekdays:
+
+```{r}
+library(lattice) 
+xyplot(steps ~ interval|dayType, type="a", data=aggregateActivityFull, layout=c(1,2))
+
 ```
